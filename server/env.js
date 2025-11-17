@@ -1,5 +1,12 @@
 import dotenv from 'dotenv';
-dotenv.config({ path: new URL('../.env', import.meta.url).pathname });
+import { existsSync } from 'node:fs';
+
+const envPath = new URL('../.env', import.meta.url).pathname;
+if (existsSync(envPath)) {
+  dotenv.config({ path: envPath });
+} else {
+  dotenv.config();
+}
 
 const demoFlag = process.env.DEMO;
 const demoEnabled = demoFlag === undefined ? true : String(demoFlag).toLowerCase() === 'true';
