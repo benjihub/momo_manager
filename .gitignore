@@ -1,0 +1,25 @@
+# Node dependencies
+node_modules/
+server/node_modules/
+
+# Environment and secrets
+.env
+*.env.local
+firebase.serviceAccount.json
+firebase.serviceAccount.*.json
+
+# Logs and runtime files
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+*.log
+
+# OS artifacts
+.DS_Store
+Thumbs.db
+
+# Build output
+/dist
+/build
+coverage/
