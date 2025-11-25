@@ -5,6 +5,12 @@ import { ENV } from '../env.js';
 const SESSION_NAME = 'momo.sid';
 const PUBLIC_PATHS = new Set(['/login', '/healthz']);
 
+// In demo mode, allow unauthenticated access to demo APIs so the front-end
+// can render demo data without requiring a login.
+if (ENV.DEMO) {
+  PUBLIC_PATHS.add('/integrations');
+}
+
 export function configureAuth(app) {
   app.use(session({
     name: SESSION_NAME,
@@ -61,6 +67,10 @@ export function registerAuthRoutes(app) {
 
 export function requireAuth(req, res, next) {
   if (req.method === 'OPTIONS') {
+    return next();
+  }
+  // Allow demo API prefixes without authentication when running in DEMO mode
+  if (ENV.DEMO && (req.path.startsWith('/api') || req.path.startsWith('/integrations'))) {
     return next();
   }
   if (PUBLIC_PATHS.has(req.path)) {
