@@ -254,6 +254,10 @@ async function renderReports() {
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" /></svg>
           Export PDF
           </button>
+          <button id="rep-print" class="btn btn-secondary">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 8H5a2 2 0 00-2 2v6h4v4h10v-4h4v-6a2 2 0 00-2-2zM17 3H7v5h10V3z"/></svg>
+            Print
+          </button>
         </div>
       </div>
       <div class="flex flex-wrap gap-3 mb-6">
@@ -304,6 +308,11 @@ async function renderReports() {
     const doc = new JSPDF();
     doc.text('Report', 10, 10);
     doc.save('report.pdf');
+  };
+  document.getElementById('rep-print').onclick = (e) => {
+    e?.preventDefault?.();
+    // Use the browser print dialog. Ensure the report area is printable.
+    window.print();
   };
   // When any filter changes, optionally auto-run
   ['rep-from','rep-to','rep-provider','rep-type','rep-status','rep-gran'].forEach(id => {
