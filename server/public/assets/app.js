@@ -411,8 +411,16 @@ async function renderIntegrations() {
       enabled: document.getElementById('in-enabled').checked,
       config: { baseUrl: document.getElementById('in-baseurl').value, apiKey: document.getElementById('in-apikey').value }
     };
-    await api('/integrations', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body) });
-    load();
+    try {
+      const resp = await api('/integrations', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body) });
+      console.log('Integration saved:', resp);
+      // Give visual feedback and reload list
+      alert('Integration saved: ' + (resp.name || resp.id));
+      load();
+    } catch (err) {
+      console.error('Failed to save integration:', err);
+      alert('Failed to save integration: ' + (err.message || err));
+    }
   };
   document.getElementById('in-refresh').onclick = load;
   async function load() {
