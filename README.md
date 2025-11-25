@@ -28,6 +28,27 @@ This app ingests mobile money transactions from phones (planned) and third‑par
 - Visit `/login`, enter the credentials, and the server will issue an HTTP-only session cookie.
 - Use `/logout` (top-right button) to clear the session.
 
+## Integrations (multiple networks)
+- The app supports multiple integrations running concurrently. Each integration is an independent entry with its own `providerType`, `config` and `enabled` flag.
+- Example networks you can configure side-by-side: `MTN`, `Airtel`, `Africell`, `UTL` — each becomes its own integration record and is polled/used independently.
+- The UI under **Integrations** allows creating many integrations; back-end connectors are keyed by `providerType` (see `server/connectors/generic-rest.js`). To add presets, POST to `/integrations` with a JSON body like:
+
+```json
+{
+   "name": "MTN Poller",
+   "providerType": "generic-rest",
+   "enabled": true,
+   "config": { "baseUrl": "https://mtn.example/api", "apiKey": "XXX" }
+}
+```
+
+- Recommendations:
+   - Give each integration a descriptive `name` and unique `config` (credentials) per network.
+   - Set `enabled: false` until you verify credentials with the `/integrations/:id/test` endpoint.
+   - Use different poll intervals or run schedules for high-volume providers to avoid rate limits.
+
+If you want, I can add a few demo presets (MTN/Airtel) to the demo data so you can see them listed immediately in `DEMO=true` mode.
+
 ## Environment
 See `.env.example` at repo root. Important:
 - `TZ=Africa/Kampala`

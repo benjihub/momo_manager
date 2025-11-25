@@ -174,13 +174,19 @@ async function loadDashboardData() {
     }
   }
   const ChartLib = window.Chart;
-  if (!ChartLib || !canvas) return; // Chart.js not loaded or canvas missing
-  const ctx = canvas.getContext('2d');
-  new ChartLib(ctx, {
-    type:'line',
-    data:{ labels, datasets:[{ label:'Transaction Count', data: counts, borderColor:'#2563eb', backgroundColor:'rgba(37,99,235,0.1)', tension:0.4, fill:true, borderWidth:2 }] },
-    options:{ responsive:true, maintainAspectRatio:false, plugins:{ legend:{ display:false }}, scales:{ y:{ beginAtZero:true, grid:{ color:'#f3f4f6'}}, x:{ grid:{ display:false }}} }
-  });
+  const canvas = document.getElementById('dashboard-chart');
+  if (ChartLib && canvas) {
+    try {
+      const ctx = canvas.getContext('2d');
+      new ChartLib(ctx, {
+        type:'line',
+        data:{ labels, datasets:[{ label:'Transaction Count', data: counts, borderColor:'#2563eb', backgroundColor:'rgba(37,99,235,0.1)', tension:0.4, fill:true, borderWidth:2 }] },
+        options:{ responsive:true, maintainAspectRatio:false, plugins:{ legend:{ display:false }}, scales:{ y:{ beginAtZero:true, grid:{ color:'#f3f4f6'}}, x:{ grid:{ display:false }}} }
+      });
+    } catch (e) {
+      console.warn('Dashboard chart render failed:', e);
+    }
+  }
 }
 
 async function renderTransactions() {
@@ -348,14 +354,21 @@ async function renderReports() {
 
       // Load summary data
       const data = await api(`/api/reports/summary?${qp.toString()}`);
+      if (!Array.isArray(data)) {
+        throw new Error('Reports API returned unexpected data');
+      }
 
       // Render chart (destroy previous)
-      const ChartLib = window.Chart;
-      const canvas = document.getElementById('rep-chart');
-      if (ChartLib && canvas) {
-        const ctx = canvas.getContext('2d');
-        if (chartRef && chartRef.destroy) chartRef.destroy();
-        chartRef = new ChartLib(ctx, { type:'bar', data:{ labels:data.map(d=>d.bucket), datasets:[ { label:'Deposits', data:data.map(d=>d.depositSum), backgroundColor:'#16a34a' }, { label:'Withdrawals', data:data.map(d=>d.withdrawalSum), backgroundColor:'#dc2626' } ] }, options:{ responsive:true, maintainAspectRatio:false, plugins:{ legend:{ position:'top', align:'end' }}, scales:{ y:{ beginAtZero:true, grid:{ color:'#f3f4f6'}}, x:{ grid:{ display:false }}} }});
+      try {
+        const ChartLib = window.Chart;
+        const canvas = document.getElementById('rep-chart');
+        if (ChartLib && canvas) {
+          const ctx = canvas.getContext('2d');
+          if (chartRef && chartRef.destroy) chartRef.destroy();
+          chartRef = new ChartLib(ctx, { type:'bar', data:{ labels:data.map(d=>d.bucket), datasets:[ { label:'Deposits', data:data.map(d=>d.depositSum), backgroundColor:'#16a34a' }, { label:'Withdrawals', data:data.map(d=>d.withdrawalSum), backgroundColor:'#dc2626' } ] }, options:{ responsive:true, maintainAspectRatio:false, plugins:{ legend:{ position:'top', align:'end' }}, scales:{ y:{ beginAtZero:true, grid:{ color:'#f3f4f6'}}, x:{ grid:{ display:false }}} }});
+        }
+      } catch (e) {
+        console.warn('Reports chart failed to render:', e);
       }
 
       // Render table
@@ -413,9 +426,7 @@ async function renderIntegrations() {
     };
     try {
       const resp = await api('/integrations', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body) });
-      console.log('Integration saved:', resp);
-      // Give visual feedback and reload list
-      alert('Integration saved: ' + (resp.name || resp.id));
+      alert('Integration saved successfully');
       load();
     } catch (err) {
       console.error('Failed to save integration:', err);
@@ -425,9 +436,8 @@ async function renderIntegrations() {
   document.getElementById('in-refresh').onclick = load;
   async function load() {
     const list = await api('/integrations');
-    console.log('DEBUG: fetched integrations', list);
     const body = document.getElementById('in-body'); body.innerHTML='';
-    for (const it of list) {
+    for (const it of list.filter(it => it.enabled)) {
       const statusBadge = it.enabled ? '<span class="stat-badge stat-badge-green">Active</span>' : '<span class="stat-badge stat-badge-gray">Inactive</span>';
       const tr = el(`<tr><td class="font-medium">${it.name}</td><td>${it.providerType}</td><td>${statusBadge}</td><td class="text-gray-500">${it.status||'—'}</td><td class="text-gray-500 text-sm">${it.lastRunAt?.seconds? new Date(it.lastRunAt.seconds*1000).toLocaleString(): '—'}</td><td class="space-x-2"></td></tr>`);
       const td = tr.querySelector('td:last-child');
