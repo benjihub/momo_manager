@@ -2,7 +2,7 @@
 import { formatDailyBucket, startOfDayKampala, endOfDayKampala } from '../utils/time.js';
 import { broadcast } from '../sse.js';
 
-const PROVIDERS = ['M-Pesa', 'Airtel', 'Tigo'];
+const PROVIDERS = ['M-Pesa', 'Airtel', 'Tigo', 'MTN'];
 const TYPES = ['deposit', 'withdrawal'];
 const CHANNELS = ['USSD', 'Agent', 'Mobile App', 'API'];
 const LOCATIONS = ['Dar es Salaam', 'Dodoma', 'Mwanza', 'Arusha', 'Mbeya', 'Morogoro'];
@@ -239,6 +239,30 @@ function generateDevices() {
 function generateIntegrations() {
   const now = new Date();
   return [
+    {
+      id: 'demo-int-mtn',
+      name: 'MTN Network Connector (Demo)',
+      providerType: 'generic-rest',
+      enabled: true,
+      status: 'OK',
+      pollIntervalSec: 60,
+      config: { baseUrl: 'https://mtn.mock/demo', apiKey: 'mtn-demo-key' },
+      lastRunAt: new Date(now.getTime() - 2 * 60 * 1000),
+      updatedAt: new Date(now.getTime() - 2 * 60 * 1000),
+      createdAt: new Date(now.getTime() - 10 * 24 * 3600 * 1000)
+    },
+    {
+      id: 'demo-int-airtel',
+      name: 'Airtel Network Connector (Demo)',
+      providerType: 'generic-rest',
+      enabled: true,
+      status: 'OK',
+      pollIntervalSec: 75,
+      config: { baseUrl: 'https://airtel.mock/demo', apiKey: 'airtel-demo-key' },
+      lastRunAt: new Date(now.getTime() - 5 * 60 * 1000),
+      updatedAt: new Date(now.getTime() - 5 * 60 * 1000),
+      createdAt: new Date(now.getTime() - 12 * 24 * 3600 * 1000)
+    },
     {
       id: 'demo-int-1',
       name: 'Demo REST Connector',
