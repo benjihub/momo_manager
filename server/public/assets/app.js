@@ -425,6 +425,7 @@ async function renderIntegrations() {
   document.getElementById('in-refresh').onclick = load;
   async function load() {
     const list = await api('/integrations');
+    console.log('DEBUG: fetched integrations', list);
     const body = document.getElementById('in-body'); body.innerHTML='';
     for (const it of list) {
       const statusBadge = it.enabled ? '<span class="stat-badge stat-badge-green">Active</span>' : '<span class="stat-badge stat-badge-gray">Inactive</span>';
